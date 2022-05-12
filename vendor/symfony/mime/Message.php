@@ -42,7 +42,7 @@ class Message extends RawMessage
     /**
      * @return $this
      */
-    public function setBody(AbstractPart $body = null): static
+    public function setBody(AbstractPart $body = null)
     {
         $this->body = $body;
 
@@ -57,7 +57,7 @@ class Message extends RawMessage
     /**
      * @return $this
      */
-    public function setHeaders(Headers $headers): static
+    public function setHeaders(Headers $headers)
     {
         $this->headers = $headers;
 
@@ -80,9 +80,7 @@ class Message extends RawMessage
             $headers->addMailboxListHeader('From', [$headers->get('Sender')->getAddress()]);
         }
 
-        if (!$headers->has('MIME-Version')) {
-            $headers->addTextHeader('MIME-Version', '1.0');
-        }
+        $headers->addTextHeader('MIME-Version', '1.0');
 
         if (!$headers->has('Date')) {
             $headers->addDateHeader('Date', new \DateTimeImmutable());

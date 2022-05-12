@@ -26,14 +26,10 @@ use Symfony\Component\Routing\RequestContext;
  */
 trait CompiledUrlMatcherTrait
 {
-    private bool $matchHost = false;
-    private array $staticRoutes = [];
-    private array $regexpList = [];
-    private array $dynamicRoutes = [];
-
-    /**
-     * @var callable|null
-     */
+    private $matchHost = false;
+    private $staticRoutes = [];
+    private $regexpList = [];
+    private $dynamicRoutes = [];
     private $checkCondition;
 
     public function match(string $pathinfo): array
@@ -91,7 +87,7 @@ trait CompiledUrlMatcherTrait
         }
         $supportsRedirections = 'GET' === $canonicalMethod && $this instanceof RedirectableUrlMatcherInterface;
 
-        foreach ($this->staticRoutes[$trimmedPathinfo] ?? [] as [$ret, $requiredHost, $requiredMethods, $requiredSchemes, $hasTrailingSlash, , $condition]) {
+        foreach ($this->staticRoutes[$trimmedPathinfo] ?? [] as list($ret, $requiredHost, $requiredMethods, $requiredSchemes, $hasTrailingSlash, , $condition)) {
             if ($condition && !($this->checkCondition)($condition, $context, 0 < $condition ? $request ?? $request = $this->request ?: $this->createRequest($pathinfo) : null)) {
                 continue;
             }
@@ -131,7 +127,7 @@ trait CompiledUrlMatcherTrait
 
         foreach ($this->regexpList as $offset => $regex) {
             while (preg_match($regex, $matchedPathinfo, $matches)) {
-                foreach ($this->dynamicRoutes[$m = (int) $matches['MARK']] as [$ret, $vars, $requiredMethods, $requiredSchemes, $hasTrailingSlash, $hasTrailingVar, $condition]) {
+                foreach ($this->dynamicRoutes[$m = (int) $matches['MARK']] as list($ret, $vars, $requiredMethods, $requiredSchemes, $hasTrailingSlash, $hasTrailingVar, $condition)) {
                     if (null !== $condition) {
                         if (0 === $condition) { // marks the last route in the regexp
                             continue 3;

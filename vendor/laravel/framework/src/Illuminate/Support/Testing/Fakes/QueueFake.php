@@ -74,7 +74,7 @@ class QueueFake extends QueueManager implements Queue
             [$job, $callback] = [$this->firstClosureParameterType($job), $job];
         }
 
-        $this->assertPushed($job, function ($job, $pushedQueue) use ($callback, $queue) {
+        return $this->assertPushed($job, function ($job, $pushedQueue) use ($callback, $queue) {
             if ($pushedQueue !== $queue) {
                 return false;
             }
@@ -272,7 +272,7 @@ class QueueFake extends QueueManager implements Queue
     /**
      * Push a new job onto the queue.
      *
-     * @param  string|object  $job
+     * @param  string  $job
      * @param  mixed  $data
      * @param  string|null  $queue
      * @return mixed
@@ -299,10 +299,10 @@ class QueueFake extends QueueManager implements Queue
     }
 
     /**
-     * Push a new job onto the queue after (n) seconds.
+     * Push a new job onto the queue after a delay.
      *
      * @param  \DateTimeInterface|\DateInterval|int  $delay
-     * @param  string|object  $job
+     * @param  string  $job
      * @param  mixed  $data
      * @param  string|null  $queue
      * @return mixed
@@ -316,7 +316,7 @@ class QueueFake extends QueueManager implements Queue
      * Push a new job onto the queue.
      *
      * @param  string  $queue
-     * @param  string|object  $job
+     * @param  string  $job
      * @param  mixed  $data
      * @return mixed
      */
@@ -326,11 +326,11 @@ class QueueFake extends QueueManager implements Queue
     }
 
     /**
-     * Push a new job onto a specific queue after (n) seconds.
+     * Push a new job onto the queue after a delay.
      *
      * @param  string  $queue
      * @param  \DateTimeInterface|\DateInterval|int  $delay
-     * @param  string|object  $job
+     * @param  string  $job
      * @param  mixed  $data
      * @return mixed
      */

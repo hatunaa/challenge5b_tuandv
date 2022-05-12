@@ -2,13 +2,10 @@
 
 namespace Illuminate\Mail\Transport;
 
-use Aws\Exception\AwsException;
 use Aws\Ses\SesClient;
-use Exception;
-use Symfony\Component\Mailer\SentMessage;
-use Symfony\Component\Mailer\Transport\AbstractTransport;
+use Swift_Mime_SimpleMessage;
 
-class SesTransport extends AbstractTransport
+class SesTransport extends Transport
 {
     /**
      * The Amazon SES instance.
@@ -35,44 +32,31 @@ class SesTransport extends AbstractTransport
     {
         $this->ses = $ses;
         $this->options = $options;
-
-        parent::__construct();
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
-    protected function doSend(SentMessage $message): void
+    public function send(Swift_Mime_SimpleMessage $message, &$failedRecipients = null)
     {
-        try {
-            $this->ses->sendRawEmail(
-                array_merge(
-                    $this->options, [
-                        'Source' => $message->getEnvelope()->getSender()->toString(),
-                        'Destinations' => collect($message->getEnvelope()->getRecipients())
-                                ->map
-                                ->toString()
-                                ->values()
-                                ->all(),
-                        'RawMessage' => [
-                            'Data' => $message->toString(),
-                        ],
-                    ]
-                )
-            );
-        } catch (AwsException $e) {
-            throw new Exception('Request to AWS SES API failed.', $e->getCode(), $e);
-        }
-    }
+        $this->beforeSendPerformed($message);
 
-    /**
-     * Get the string representation of the transport.
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return 'ses';
+        $result = $this->ses->sendRawEmail(
+            array_merge(
+                $this->options, [
+                    'Source' => key($message->getSender() ?: $message->getFrom()),
+                    'RawMessage' => [
+                        'Data' => $message->toString(),
+                    ],
+                ]
+            )
+        );
+
+        $message->getHeaders()->addTextHeader('X-SES-Message-ID', $result->get('MessageId'));
+
+        $this->sendPerformed($message);
+
+        return $this->numberOfRecipients($message);
     }
 
     /**
